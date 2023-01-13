@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: citisquarefe
+  labels:
+    app: citisquarefe
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: citisquarefe
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: citisquarefe
+    spec:
+      containers:
+        - name: citisquarefe
+          image: <IMAGE>
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 300m
+            limits:
+              cpu: 600m
+          # -- Environment Variables to be passed to the deployment
+          env:
+            - name: NEXT_PUBLIC_MERCHANT_FRONTEND_DOMAIN
+              value: "https://merchant.citisquare.africa/"
+            - name: NEXT_PUBLIC_GATEWAY_URL_DOMAIN
+              value: "https://gateway.citisquare.africa/"
+            - name: NEXT_PUBLIC_FACEBOOK_TEST_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: facebook-test-app-id-secret
+                  key: NEXT_PUBLIC_FACEBOOK_TEST_APP_ID
+            - name: NEXT_PUBLIC_FACEBOOK_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: facebook-app-id-secret
+                  key: NEXT_PUBLIC_FACEBOOK_APP_ID
+            - name: NEXT_PUBLIC_GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-google-client-id
+                  key: GOOGLE_CLIENT_ID
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: citisquarefe-service
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+  selector:
+    app: citisquarefe

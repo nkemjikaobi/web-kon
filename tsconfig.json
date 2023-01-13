@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": false,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      //These will be updated accordingly in future..These are just to accomodate absolute imports around the application.
+      "@components/*": ["src/components/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@graphql/*": ["src/graphql/*"],
+      "@schemas/*": ["src/schemas/*"],
+      "@dto/*": ["src/dto/*"],
+      "@shared/*": ["src/shared/*"],
+      "@componentData/*": ["src/componentData/*"],
+      "@pages/*": ["pages/*"],
+      "@atoms/*": ["src/components/atoms/*"],
+      "@molecules/*": ["src/components/molecules/*"],
+      "@organisms/*": ["src/components/organisms/*"],
+      "@layouts/*": ["src/components/layouts/*"],
+      "@modules/*": ["src/modules/*"],
+      "@images/*": ["public/images/*"],
+      "@skeletons/*": ["src/skeletons/*"],
+      "@modals/*": ["src/skeletons/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}

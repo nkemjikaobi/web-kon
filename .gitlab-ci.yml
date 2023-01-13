@@ -1,0 +1,53 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+before_script:
+  - apk add --update --no-cache jq py-pip
+  - pip install awscli
+  - $(aws ecr get-login --no-include-email --region $AWS_REGION)
+  - IMAGE_TAG="$(echo $CI_COMMIT_SHA | head -c 8)"
+
+stages:
+  - test
+  - build
+  - deploy
+
+test-job:
+  stage: test
+  tags:
+    - shell
+  script:
+    - echo "Running tests"
+  only:
+    - dev
+
+build-job:
+  stage: build
+  tags:
+    - shell
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - aws ecr get-login-password --region $AWS_REGION |
+      docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+    - docker build -t $REPOSITORY_URL:$IMAGE_TAG -f Dockerfile.prod .
+    - docker push $REPOSITORY_URL:$IMAGE_TAG
+  only:
+    - dev
+
+deploy-job:
+  stage: deploy
+  tags:
+    - shell
+  script:
+    - echo `aws ecs describe-task-definition --task-definition  $CI_AWS_ECS_TASK_DEFINITION --region $AWS_REGION` > input.json
+    - echo $(cat input.json | jq '.taskDefinition.containerDefinitions[].image="'$REPOSITORY_URL':'$IMAGE_TAG'"') >  input.json
+    - echo $(cat input.json | jq '.taskDefinition') > input.json
+    - echo $(cat input.json | jq  'del(.taskDefinitionArn)' | jq 'del(.requiresAttributes)' | jq 'del(.revision)' | jq 'del(.status)' | jq 'del(.requiresAttributes)' | jq 'del(.compatibilities)' | jq 'del(.registeredAt)' | jq 'del(.registeredBy)') > input.json
+    - aws ecs register-task-definition --cli-input-json file://input.json --region $AWS_REGION
+    - revision=$(aws ecs describe-task-definition --task-definition $CI_AWS_ECS_TASK_DEFINITION --region $AWS_REGION | egrep "revision" | tr "/" " " | awk '{print $2}' | sed 's/"$//' | cut -d "," -f 1)
+    - aws ecs update-service --cluster $CI_AWS_ECS_CLUSTER --service $CI_AWS_ECS_SERVICE  --task-definition $CI_AWS_ECS_TASK_DEFINITION:$revision --region $AWS_REGION
+  only:
+    - dev

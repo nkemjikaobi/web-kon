@@ -1,0 +1,75 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": ["plugin:react/recommended", "google", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["react", "@typescript-eslint", "eslint-plugin-import-helpers"],
+  "ignorePatterns": ["next-env.d.ts"], //this is being ignored because the file regenerates on every build hence overriding linting.
+  "rules": {
+    "import-helpers/order-imports": [
+      "error",
+      {
+        // useful thing to note: For every new absolute path added in tsconf.json, add the respective path here in the same order also to ensure consistency
+        "newlinesBetween": "always",
+        "groups": [
+          "module",
+          "/^@components/",
+          "/^@hooks/",
+          "/^@graphql/",
+          "/^@schemas/",
+          "/^@dto/",
+          "/^@shared/",
+          "/^@componentData/",
+          "/^@pages/",
+          "/^@atoms/",
+          "/^@molecules/",
+          "/^@organisms/",
+          "/^@layouts/",
+          "/^@modules/",
+          "/^@images/",
+          "/^@skeletons/",
+          "/^@modals/",
+          ["parent", "sibling", "index"]
+        ],
+        "alphabetize": { "order": "asc", "ignoreCase": true }
+      }
+    ],
+    "react/jsx-sort-props": [
+      "error",
+      {
+        "ignoreCase": true
+      }
+    ],
+    "react/require-default-props": [
+      2,
+      {
+        "forbidDefaultForRequired": true
+      }
+    ],
+    "react/prop-types": [
+      1,
+      {
+        "ignore": ["children"]
+      }
+    ],
+    "react/react-in-jsx-scope": "off",
+    "no-param-reassign": "error",
+    "react/self-closing-comp": "error",
+    "react/no-unused-state": "error",
+    "react/no-unused-prop-types": "warn"
+  },
+  "settings": {
+    "react": {
+      "version": "18.1.0"
+    }
+  }
+}
